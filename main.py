@@ -2,15 +2,56 @@ from classes.bibliothecaire import Bibliothcaire
 from classes.livre import Livre
 from classes.magazine import Magazine
 from classes.adherant import Adherant
-
+from classes.auth_user import UserAuth
+from classes.authentification import Authentification
+import bcrypt
 
 
 class Menu:
     def __init__(self):
+        
         self.biblio = Bibliothcaire()
+        self.auth = Authentification()
+
+    
+    def menu_connexion(self) :
+        while True:
+            print("1. Se Connecter")
+            print("2. S'inscrire en tant qu'admin")
+            print("0. Quitter")
+            choix = input("Votre choix : ")
+            match choix:
+                case '1' :
+
+                    email = self.biblio.demander_chaine("Email : ")
+                    password = self.biblio.demander_mdp("Mot de passe : ")
+                    password = password.encode('utf-8')
+                    # password = bcrypt.hashpw(password, bcrypt.gensalt())
+                    admin = self.auth.se_connecter(email, password)
+                    if admin != None :
+                        self.lancer_menu(admin)
+                    else :
+                        print("Email ou mot de passe incorrect!!!")
+                case '2' :
+                    nom = self.biblio.demander_chaine("Nom : ")
+                    email = self.biblio.demander_chaine("Email : ")
+                    password = self.biblio.demander_mdp("Mot de passe : ")
+                    password = password.encode('utf-8')
+                    password = bcrypt.hashpw(password, bcrypt.gensalt())
+                    auth = UserAuth(nom, email, password)
+                    Authentification.s_inscrire(auth)
+
+                case '0' :
+                    print("Bye!")
+                    exit()
+
+                case _: 
+                    print("Choix invalide")
 
 
-    def lancer_menu(self) :
+
+    def lancer_menu(self,admin) :
+        print(f"Bienvenue {admin['nom']}")
         while True :
             print('~'*20 ,'GESTION DE BIBLIOTHEQUE', '~'*20 )
             print("1. Ajouter un document")
@@ -27,9 +68,9 @@ class Menu:
             match choice :
 
                 case '1' :
-                    titre = input("Veuillez saisir le titre du livre: ")
-                    auteur = input("Veuillez saisir l'auteur: ")
-                    theme = input("Veuillez saisir le theme: ")
+                    titre = Bibliothcaire.demander_chaine("Veuillez saisir le titre du livre: ")
+                    auteur = Bibliothcaire.demander_chaine("Veuillez saisir l'auteur: ")
+                    theme = Bibliothcaire.demander_chaine("Veuillez saisir le theme: ")
 
                     while True:
                         type_doc = input(
@@ -51,14 +92,14 @@ class Menu:
 
                 case '2' :
                     while True:
-                        nom = input("Veillez entrer votre nom: ").strip()
+                        nom = Bibliothcaire.demander_chaine("Veillez entrer votre nom: ").strip()
                         if nom.isalpha():
                             break
                         else:
                             print("Veuillez entrer un nom valide")
 
                     while True:
-                        prenom = input("Veillez entrer votre prenom: ").strip()
+                        prenom = Bibliothcaire.demander_chaine("Veillez entrer votre prenom: ").strip()
                         if nom.isalpha():
                             break
                         else:
@@ -87,13 +128,19 @@ class Menu:
                     self.biblio.rechercher_document(mot)
 
                 case '9' : 
-                    exit()
+                    break
 
                 case _ : 
                     print("Choix invalide")
 
-                    
+    
 
 
 main = Menu()
-main.lancer_menu()
+main.menu_connexion()
+
+
+
+
+
+    

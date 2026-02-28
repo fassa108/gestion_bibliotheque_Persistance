@@ -2,14 +2,39 @@ from classes.livre import Livre
 from classes.magazine import Magazine
 from classes.adherant import Adherant
 from database.dbConnect import DbConnect
+import getpass
 
 class Bibliothcaire() :
     def __init__(self):
+        
         self.liste_adherants = []
         self.liste_documents = []
 
 
-    def executer_requete(self,sql,parametre = None) :
+    @staticmethod
+    def demander_chaine (message) :
+        while True :
+            valeur = input(message).strip()
+            if valeur == "" :
+                print("Le champs ne peut pas etre vide!!!")
+            elif valeur.isdigit() :
+                print("Vous ne devez pas ecrire uniquement des chiffres!!!")
+            else :
+                return valeur
+    
+    @staticmethod
+    def demander_mdp(message) :
+        while True :
+            valeur = getpass.getpass((message)).strip()
+            if valeur == "" :
+                print("Le champs ne peut pas etre vide!!!")
+            
+            else :
+                return valeur
+    
+
+    @staticmethod
+    def executer_requete(sql,parametre = None) :
         with DbConnect() as conn :
             if conn :
                 with conn.cursor(dictionary=True) as curseur :
@@ -68,7 +93,7 @@ class Bibliothcaire() :
 
     def recuperer_adherant(self) :
         liste_adherant = self.afficher_adherant()
-        choix = input("Veuillez saisir l'ID de l'adherant : ")
+        choix = self.demander_chaine("Veuillez saisir l'ID de l'adherant : ")
         for adherant in liste_adherant :
             if str(adherant['id']) == choix :
                 id_adherant = adherant['id']
@@ -80,7 +105,7 @@ class Bibliothcaire() :
 
     def recuperer_document(self) :
         liste_document = self.afficher_document()
-        choix = input("Veuillez saisir l'ID du document : ")
+        choix = self.demander_chaine("Veuillez saisir l'ID du document : ")
         for document in liste_document :
             if str(document['id']) == choix and document['disponibilite'] == True:
                 id_document = document['id']
@@ -108,6 +133,11 @@ class Bibliothcaire() :
             else :
                 print("L'enregistrement de l'emprunt a echoue")
 
+        elif id_document == None :
+            print("Livre inexistant ou indisponible")
+        else : 
+            print("Adherant inexistant")
+
 
 
     def afficher_emprunt(self) :
@@ -127,7 +157,7 @@ class Bibliothcaire() :
 
     def recuperer_emprunt(self) :
         liste = self.afficher_emprunt()
-        choix = input("Veuillez saisir l' ID de l'emprunt que vous voulez marque retourne : ")
+        choix = self.demander_mdp("Veuillez saisir l' ID de l'emprunt que vous voulez marque retourne : ")
         
         for e in liste :
             if str(e['id']) == choix and e['etat'] == 'en cours' :
@@ -171,3 +201,6 @@ class Bibliothcaire() :
                 dispo = 'Disponible' if resultat['disponibilite'] else 'Non disponible'
                 print(f"--> ID : {resultat['id']} | TYPE : {resultat['type']} | TITRE : {resultat['titre']} | AUTEUR : {resultat['auteur']} | THEME : {resultat['theme']} |::| {dispo}")
 
+
+
+    
